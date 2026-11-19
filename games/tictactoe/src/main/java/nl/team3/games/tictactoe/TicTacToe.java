@@ -7,11 +7,13 @@ import nl.team3.games.tictactoe.scenes.MainMenuScene;
 import org.joml.Vector4f;
 
 public final class TicTacToe {
+    public static final String GAME_TYPE = "Tic-tac-toe";
+
     private TicTacToe() {
     }
 
     public static void main(String[] args) {
-        EngineConfig config = EngineConfig.builder("Tic-tac-toe")
+        EngineConfig config = EngineConfig.builder(GAME_TYPE)
                 .windowSize(720, 720)
                 .minWindowSize(640, 640)
                 .minGuiSize(640, 640)

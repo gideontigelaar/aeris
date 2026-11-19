@@ -5,6 +5,7 @@ import nl.team3.engine.core.EngineContext;
 import nl.team3.engine.graphics.Sprite;
 import nl.team3.engine.graphics.Texture;
 import nl.team3.engine.ui.Button;
+import nl.team3.games.tictactoe.TicTacToe;
 import nl.team3.network.OnlineSession;
 import nl.team3.network.ServerAddress;
 
@@ -43,7 +44,7 @@ public class OnlineMenuScene extends MenuScene {
     }
 
     private void join(OnlineSession.Mode mode) {
-        login = new OnlineSession(address, mode, playerName);
+        login = new OnlineSession(address, TicTacToe.GAME_TYPE, mode, playerName);
         modeButtons.forEach(button -> button.setEnabled(false));
         showProgress("Connecting to " + address + "...");
     }
