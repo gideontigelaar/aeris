@@ -7,8 +7,6 @@ import java.util.Locale;
 import java.util.Map;
 
 public class OnlineSession {
-    public static final String GAME_TYPE = "Tic-tac-toe";
-
     private static final float LOGIN_TIMEOUT = 5f;
     private static final float LOGIN_RETRY_TIME = 0.5f;
 
@@ -32,13 +30,14 @@ public class OnlineSession {
     private final ServerAddress address;
     private final Mode mode;
     private final String loginName;
+    private final String requestedGameType;
     private final Map<String, String> challenges = new LinkedHashMap<>();
     private final Map<String, String> challengesView = Collections.unmodifiableMap(challenges);
 
     private ServerConnection connection;
     private List<String> players = List.of();
     private String challenged;
-    private String gameType = GAME_TYPE;
+    private String gameType;
 
     private boolean loginSent;
     private boolean relogin;
@@ -46,8 +45,10 @@ public class OnlineSession {
     private float retryTimer;
     private String loginError = "";
 
-    public OnlineSession(ServerAddress address, Mode mode, String name) {
+    public OnlineSession(ServerAddress address, String gameType, Mode mode, String name) {
         this.address = address;
+        this.requestedGameType = gameType;
+        this.gameType = gameType;
         this.mode = mode;
         this.loginName = name.toLowerCase(Locale.ROOT);
         this.connection = new ServerConnection(address);
@@ -125,7 +126,7 @@ public class OnlineSession {
 
         switch (message.type()) {
             case "SVR GAMELIST" -> message.items().stream()
-                    .filter(game -> isGame(game, GAME_TYPE))
+                    .filter(game -> isGame(game, requestedGameType))
                     .findFirst()
                     .ifPresent(game -> gameType = game);
             case "SVR PLAYERLIST" -> {
@@ -162,7 +163,7 @@ public class OnlineSession {
     }
 
     public boolean isOurGame(ServerMessage message) {
-        return isGame(message.get("GAMETYPE"), GAME_TYPE);
+        return isGame(message.get("GAMETYPE"), requestedGameType);
     }
 
     public boolean isMe(String player) {
@@ -189,8 +190,8 @@ public class OnlineSession {
         }
     }
 
-    public void move(int cell) {
-        connection.sendCommand("move " + cell);
+    public void move(int index) {
+        connection.sendCommand("move " + index);
     }
 
     public void forfeit() {
