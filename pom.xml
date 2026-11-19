@@ -13,7 +13,9 @@
 
   <modules>
     <module>engine</module>
+    <module>network</module>
     <module>games/tictactoe</module>
+    <module>games/reversi</module>
   </modules>
 
   <properties>
