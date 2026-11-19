@@ -5,7 +5,7 @@ import nl.team3.engine.core.EngineContext;
 import nl.team3.engine.input.Keys;
 import nl.team3.engine.ui.TextField;
 import nl.team3.games.tictactoe.Settings;
-import nl.team3.games.tictactoe.network.ServerAddress;
+import nl.team3.network.ServerAddress;
 import org.joml.Vector2f;
 
 import java.util.Locale;
