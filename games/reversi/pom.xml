@@ -22,6 +22,10 @@
       <groupId>nl.team3</groupId>
       <artifactId>engine</artifactId>
     </dependency>
+    <dependency>
+      <groupId>nl.team3</groupId>
+      <artifactId>network</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
