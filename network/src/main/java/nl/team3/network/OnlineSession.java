@@ -1,4 +1,4 @@
-package nl.team3.games.tictactoe.network;
+package nl.team3.network;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

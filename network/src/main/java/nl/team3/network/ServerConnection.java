@@ -1,4 +1,4 @@
-package nl.team3.games.tictactoe.network;
+package nl.team3.network;
 
 import java.io.BufferedReader;
 import java.io.IOException;

@@ -1,4 +1,4 @@
-package nl.team3.games.tictactoe.network;
+package nl.team3.network;
 
 public record ServerAddress(String host, int port) {
     public static final int DEFAULT_PORT = 7789;
