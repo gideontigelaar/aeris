@@ -5,8 +5,8 @@ import nl.team3.engine.core.EngineContext;
 import nl.team3.engine.graphics.Sprite;
 import nl.team3.engine.graphics.Texture;
 import nl.team3.engine.ui.Button;
-import nl.team3.games.tictactoe.network.OnlineSession;
-import nl.team3.games.tictactoe.network.ServerAddress;
+import nl.team3.network.OnlineSession;
+import nl.team3.network.ServerAddress;
 
 import java.util.ArrayList;
 import java.util.List;

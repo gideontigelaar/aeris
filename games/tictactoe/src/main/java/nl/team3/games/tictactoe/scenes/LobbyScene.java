@@ -7,8 +7,8 @@ import nl.team3.engine.graphics.Sprite;
 import nl.team3.engine.graphics.Texture;
 import nl.team3.engine.input.MouseButtons;
 import nl.team3.engine.ui.Button;
-import nl.team3.games.tictactoe.network.OnlineSession;
-import nl.team3.games.tictactoe.network.ServerMessage;
+import nl.team3.network.OnlineSession;
+import nl.team3.network.ServerMessage;
 import org.joml.Vector4f;
 
 import java.util.ArrayList;

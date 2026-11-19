@@ -5,8 +5,8 @@ import nl.team3.engine.core.EngineContext;
 import nl.team3.games.tictactoe.BackgroundRenderer;
 import nl.team3.games.tictactoe.logic.AIOpponent;
 import nl.team3.games.tictactoe.logic.Board;
-import nl.team3.games.tictactoe.network.OnlineSession;
-import nl.team3.games.tictactoe.network.ServerMessage;
+import nl.team3.network.OnlineSession;
+import nl.team3.network.ServerMessage;
 import org.joml.Vector4f;
 
 import java.util.Locale;
