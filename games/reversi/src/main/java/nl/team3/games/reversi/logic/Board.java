@@ -7,8 +7,9 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Board {
-    public static final int SIZE = 9;
-
+    public static final int SIZE = 8;
+    public int Xscore = 0;
+    public int Oscore = 0;
     public enum Mark {
         X, O;
 
@@ -18,13 +19,9 @@ public class Board {
     }
 
     // All rows, columns and diagonals as {col, row}
-    private static final int[][][] LINES = {
-            {{0, 0}, {1, 0}, {2, 0}}, {{0, 1}, {1, 1}, {2, 1}}, {{0, 2}, {1, 2}, {2, 2}},
-            {{0, 0}, {0, 1}, {0, 2}}, {{1, 0}, {1, 1}, {1, 2}}, {{2, 0}, {2, 1}, {2, 2}},
-            {{0, 0}, {1, 1}, {2, 2}}, {{2, 0}, {1, 1}, {0, 2}}
-    };
 
-    private final Mark[][] cells = new Mark[SIZE][SIZE];
+    private boolean gameOver = false;
+    private Mark[][] cells = new Mark[SIZE][SIZE];
     private Mark turn;
     private Mark winner;
     private int[][] winningLine;
@@ -32,23 +29,60 @@ public class Board {
 
     public Board(Mark firstTurn) {
         this.turn = firstTurn;
+        int mid = SIZE / 2;
+        cells[mid - 1][mid - 1] = Mark.O;
+        cells[mid][mid]         = Mark.O;
+        cells[mid - 1][mid]     = Mark.X;
+        cells[mid][mid - 1]     = Mark.X;
+        updateScore();
+    }
+
+    private boolean hasAnyMove(Mark mark) {
+        for (int c = 0; c < SIZE; c++)
+            for (int r = 0; r < SIZE; r++)
+                if (getAllFlipped(cells, c, r, mark) != cells) return true;
+        return false;
     }
 
     public boolean canPlace(int col, int row) {
-        return !isGameOver() && cells[col][row] == null;
+        return !isGameOver() && cells[col][row] == null && cells != getAllFlipped(cells, col,row, turn);
+    }
+
+    private void updateScore(){
+        Xscore = 0; Oscore = 0;
+        for(int x = 0; x < SIZE; x++){
+            for(int y = 0; y < SIZE; y++){
+                if(cells[x][y] == Mark.X){Xscore += 1;}
+                else if(cells[x][y] == Mark.O){Oscore += 1;}
+            }
+        }
     }
 
     public void place(int col, int row) {
+
         if (!canPlace(col, row)) {
             throw new IllegalStateException("Cell " + col + "," + row + " is not available");
         }
 
-        cells[col][row] = turn;
+
+
+        cells = getAllFlipped(cells, col,row, turn);
         moves++;
 
+        updateScore();
+        Mark next = turn.opponent();
 
-        turn = turn.opponent();
-
+        if(hasAnyMove(next)){
+            turn = turn.opponent();
+        }
+        else if(!hasAnyMove(turn)){
+            gameOver = true;
+            if(Xscore > Oscore) {
+                winner = Mark.X;
+            }
+            else if(Oscore > Xscore){winner = Mark.O;}
+            else{winner=null;}
+        }
     }
 
 
@@ -122,11 +156,14 @@ public class Board {
         return winner;
     }
 
+    public int getXscore(){ return Xscore;}
+    public int getOscore(){ return Oscore;}
+
     public boolean isDraw() {
-        return winner == null && moves == SIZE * SIZE;
+        return gameOver && winner == null;
     }
 
     public boolean isGameOver() {
-        return winner != null || isDraw();
+        return gameOver;
     }
 }
