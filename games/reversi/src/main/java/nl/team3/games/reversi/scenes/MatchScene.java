@@ -79,7 +79,7 @@ public class MatchScene extends BaseScene {
     private boolean logoVisible;
     private Sprite ghost;
     private Sprite pixel;
-
+    private String ScoreLine;
     private PieceSide xSide;
     private PieceSide oSide;
     private final Sprite[][] boardPieces = new Sprite[Board.SIZE][Board.SIZE];
@@ -279,6 +279,7 @@ public class MatchScene extends BaseScene {
 
     @Override
     protected void onInit(AssetManager assets) {
+        ScoreLine = "no score yet lol";
         boardTexture = assets.loadTexture("board", "/games/reversi/textures/board.png");
         boardSprite = new Sprite(boardTexture);
         boardSprite.setScale(BOARD_SCALE);
@@ -297,8 +298,22 @@ public class MatchScene extends BaseScene {
         ghost.setScale(BOARD_SCALE);
         ghost.setAlpha(GHOST_ALPHA);
 
+
+
         btnAction = createButton("LEAVE GAME", BUTTON_WIDTH, this::leave);
         btnPlayAgain = createButton("PLAY AGAIN", BUTTON_WIDTH, this::playAgain);
+
+        for (int c = 0; c < Board.SIZE; c++) {
+            for (int r = 0; r < Board.SIZE; r++) {
+                Board.Mark mark = board.getCell(c, r);
+                if (mark != null) {
+                    Sprite s = new Sprite(sideOf(mark).pieceTexture);
+                    s.setScale(BOARD_SCALE);
+                    s.setPosition(getGridCenter(c, r));
+                    boardPieces[c][r] = s;
+                }
+            }
+        }
     }
 
     protected boolean canMove(Board.Mark mark) {
@@ -561,6 +576,8 @@ public class MatchScene extends BaseScene {
                 : new PieceMove(piece, getGridCenter(col, row), 0f, 0f, MOVE_TIME, EasingType.EXPONENTIAL_OUT);
         settling.add(move);
 
+        syncPieceTextures();
+
         side.spawnNext();
 
         if (board.isGameOver()) {
@@ -569,11 +586,12 @@ public class MatchScene extends BaseScene {
             PieceSide next = sideOf(board.getTurn());
             updatePalette(next.stackX(), next.levelY(next.stack.size()));
         }
+
     }
 
     protected void finishMatch() {
         if (fadeAnim == null) {
-            winningLine = board.getWinningLine();
+            //winningLine = board.getWinningLine();
             fadeAnim = new Animation(1f, FADE_ALPHA, EasingType.EXPONENTIAL_OUT, FADE_TIME);
             fadeAnim.startAnimation();
             resultAnim = new Animation(0f, 1f, EasingType.BACK_OUT, RESULT_DROP_TIME);
@@ -681,7 +699,6 @@ public class MatchScene extends BaseScene {
             spriteRenderer.draw(logo);
         }
         spriteRenderer.draw(boardSprite);
-
         xSide.drawResting();
         oSide.drawResting();
         for (int c = 0; c < Board.SIZE; c++) {
@@ -731,12 +748,27 @@ public class MatchScene extends BaseScene {
         pixel.setAlpha(1f);
     }
 
+    private void syncPieceTextures() {
+        for (int c = 0; c < Board.SIZE; c++) {
+            for (int r = 0; r < Board.SIZE; r++) {
+                Board.Mark mark = board.getCell(c, r);
+                if (boardPieces[c][r] != null && mark != null) {
+                    boardPieces[c][r].setTexture(sideOf(mark).pieceTexture);
+                }
+            }
+        }
+        ScoreLine = "X: " + board.getXscore() + " | O: " + board.getOscore();
+    }
+
+
+
     private void renderStatus() {
         if (fadeAnim != null) {
             if (!resultAnim.hasStarted()) return;
 
             float drop = Math.round((1f - resultAnim.getValue()) * RESULT_DROP);
             drawCenteredText(gameFont, fitText(gameFont, getResultTitle(), getMaxTextWidth()), statusY - drop, getResultColor());
+
 
             String detail = fitText(smallFont, getResultDetail(), getMaxTextWidth());
             drawCenteredText(smallFont, detail, statusY + gameFont.getCapHeight() + LINE_GAP - drop, WHITE);
@@ -746,6 +778,10 @@ public class MatchScene extends BaseScene {
         String status = getStatus();
         Font statusFont = gameFont.getTextWidth(status) <= getMaxTextWidth() ? gameFont : smallFont;
         float y = statusY + (statusHeight - statusFont.getCapHeight()) / 2f;
+
+        float scoreY = statusY + statusFont.getCapHeight() * 2 + LINE_GAP;
+        drawCenteredText(smallFont, fitText(smallFont, ScoreLine, getMaxTextWidth()), scoreY, WHITE);
+
         drawCenteredText(statusFont, fitText(statusFont, status, getMaxTextWidth()), y, WHITE);
     }
 
@@ -754,6 +790,7 @@ public class MatchScene extends BaseScene {
         if (name == null) return;
 
         drawText(smallFont, fitText(smallFont, name, getNameSpace()), side.nameX, nameY, WHITE);
+
     }
 
     private float getNameSpace() {
@@ -780,6 +817,7 @@ public class MatchScene extends BaseScene {
         for (int c = 0; c < Board.SIZE; c++) {
             for (int r = 0; r < Board.SIZE; r++) {
                 if (boardPieces[c][r] != null) {
+                    boardPieces[c][r].setTexture(sideOf(board.getCell(c, r)).pieceTexture);
                     boardPieces[c][r].setPosition(getGridCenter(c, r));
                     boardPieces[c][r].setScale(BOARD_SCALE);
                 }

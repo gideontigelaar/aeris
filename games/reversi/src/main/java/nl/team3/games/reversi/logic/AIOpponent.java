@@ -83,9 +83,9 @@ public class AIOpponent {
     }
 
     private static int negamax(Board.Mark[][] cells, Board.Mark toMove, int depth, int alpha, int beta) {
-        if (Board.findLine(cells, toMove.opponent()) != null) {
-            return depth - WIN_SCORE;
-        }
+       // if (Board.findLine(cells, toMove.opponent()) != null) {
+       //     return depth - WIN_SCORE;
+       // }
 
         int best = -INFINITY;
         boolean moved = false;
