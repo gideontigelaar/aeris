@@ -1,6 +1,10 @@
 package nl.team3.games.reversi.logic;
 
+import nl.team3.engine.graphics.animation.Interpolators;
+import org.joml.Vector2f;
+
 import java.util.Arrays;
+import java.util.List;
 
 public class Board {
     public static final int SIZE = 9;
@@ -42,24 +46,12 @@ public class Board {
         cells[col][row] = turn;
         moves++;
 
-        winningLine = findLine(cells, turn);
-        if (winningLine != null) {
-            winner = turn;
-        } else if (!isDraw()) {
-            turn = turn.opponent();
-        }
+
+        turn = turn.opponent();
+
     }
 
-    static int[][] findLine(Mark[][] cells, Mark mark) {
-        for (int[][] line : LINES) {
-            if (cells[line[0][0]][line[0][1]] == mark
-                    && cells[line[1][0]][line[1][1]] == mark
-                    && cells[line[2][0]][line[2][1]] == mark) {
-                return line;
-            }
-        }
-        return null;
-    }
+
 
     Mark[][] copyCells() {
         Mark[][] copy = new Mark[SIZE][];
@@ -67,6 +59,55 @@ public class Board {
             copy[col] = cells[col].clone();
         }
         return copy;
+    }
+
+
+    public Mark[][] flipInDirection(Mark[][] cells, int dx, int dy, int col, int row, Mark player){
+
+        Mark[][] flips = new Mark[SIZE][];
+        for (int i = 0; i < SIZE; i++) {
+            flips[i] = cells[i].clone();
+        }
+        int stepX = Integer.signum(dx);
+        int stepY = Integer.signum(dy);
+        int c = col + stepX;
+        int r = row + stepY;
+
+        boolean straightLine = (dx != 0 || dy != 0)
+                && (dx == 0 || dy == 0 || Math.abs(dx) == Math.abs(dy));
+        if(straightLine){
+            while (c >= 0 && c < SIZE && r >= 0 && r < SIZE) {
+                if(cells[c][r] == null){return cells;}
+                if(cells[c][r] == player){
+                    if (c == col + stepX && r == row + stepY) {return cells;}
+                    return flips;}
+                else{flips[c][r] = player;}
+                c += stepX;
+                r += stepY;
+            }
+        }
+        return cells;
+    }
+
+
+    public Mark[][] getAllFlipped( Mark[][] cells, int col, int row, Mark player){
+
+        if (col < 0 || col >= SIZE || row < 0 || row >= SIZE || cells[col][row] != null) {
+            return cells;
+        }
+
+        Mark[][] result = cells;
+        for(int dx = -1; dx <= 1; dx++){
+            for(int dy = -1; dy <= 1; dy++){
+                result = flipInDirection(result, dx, dy, col, row, player);
+            }
+        }
+
+        if (result != cells) {
+            result[col][row] = player;
+        }
+
+        return result;
     }
 
     public Mark getCell(int col, int row) {
@@ -79,10 +120,6 @@ public class Board {
 
     public Mark getWinner() {
         return winner;
-    }
-
-    public int[][] getWinningLine() {
-        return winningLine == null ? null : Arrays.stream(winningLine).map(int[]::clone).toArray(int[][]::new);
     }
 
     public boolean isDraw() {
