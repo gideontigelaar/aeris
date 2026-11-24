@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class MatchScene extends BaseScene {
     protected static final Vector4f WIN_COLOR = HIGHLIGHT_COLOR;
     protected static final Vector4f LOSE_COLOR = new Vector4f(1f, 0.25f, 0.25f, 1f);
+    protected final Runnable returnToSelector;
 
     private static final Vector4f X_COLOR = new Vector4f(1f, 0.149f, 0.455f, 1f);
     private static final Vector4f O_COLOR = new Vector4f(0.063f, 0.824f, 0.459f, 1f);
@@ -258,37 +259,52 @@ public class MatchScene extends BaseScene {
     }
 
     public MatchScene(EngineContext context) {
+        this(context, (Runnable) null);
+    }
+
+    public MatchScene(EngineContext context, Runnable returnToSelector) {
         this(context, ThreadLocalRandom.current().nextBoolean() ? Board.Mark.X : Board.Mark.O,
-                Board.Mark.X, null, null);
+                Board.Mark.X, null, null, returnToSelector);
     }
 
     // Against the computer, which plays O on the right
     public MatchScene(EngineContext context, AIOpponent ai) {
-        this(context, Board.Mark.X, Board.Mark.X, ai, Board.Mark.O);
+        this(context, ai, null);
+    }
+
+    public MatchScene(EngineContext context, AIOpponent ai, Runnable returnToSelector) {
+        this(context, Board.Mark.X, Board.Mark.X, ai, Board.Mark.O, returnToSelector);
     }
 
     protected MatchScene(EngineContext context,
                          Board.Mark firstTurn, Board.Mark leftMark, AIOpponent ai, Board.Mark aiMark) {
+        this(context, firstTurn, leftMark, ai, aiMark, null);
+    }
+
+    protected MatchScene(EngineContext context,
+                         Board.Mark firstTurn, Board.Mark leftMark, AIOpponent ai, Board.Mark aiMark,
+                         Runnable returnToSelector) {
         super(context);
         this.board = new Board(firstTurn);
         this.firstTurn = firstTurn;
         this.leftMark = leftMark;
         this.ai = ai;
         this.aiMark = aiMark;
+        this.returnToSelector = returnToSelector;
     }
 
     @Override
     protected void onInit(AssetManager assets) {
-        boardTexture = assets.loadTexture("board", "/games/tictactoe/textures/board.png");
+        boardTexture = assets.loadTexture("tictactoe.board", "/games/tictactoe/textures/board.png");
         boardSprite = new Sprite(boardTexture);
         boardSprite.setScale(BOARD_SCALE);
         logo = createLogo();
         pixel = new Sprite(assets.getTexture(AssetManager.WHITE_TEXTURE));
 
-        Texture xPieceTexture = assets.loadTexture("xPiece", "/games/tictactoe/textures/x.png");
-        Texture xStackTexture = assets.loadTexture("xStack", "/games/tictactoe/textures/xStack.png");
-        Texture oPieceTexture = assets.loadTexture("oPiece", "/games/tictactoe/textures/o.png");
-        Texture oStackTexture = assets.loadTexture("oStack", "/games/tictactoe/textures/oStack.png");
+        Texture xPieceTexture = assets.loadTexture("tictactoe.xPiece", "/games/tictactoe/textures/x.png");
+        Texture xStackTexture = assets.loadTexture("tictactoe.xStack", "/games/tictactoe/textures/xStack.png");
+        Texture oPieceTexture = assets.loadTexture("tictactoe.oPiece", "/games/tictactoe/textures/o.png");
+        Texture oStackTexture = assets.loadTexture("tictactoe.oStack", "/games/tictactoe/textures/oStack.png");
 
         xSide = new PieceSide(Board.Mark.X, leftMark == Board.Mark.X ? -1f : 1f, xPieceTexture, xStackTexture);
         oSide = new PieceSide(Board.Mark.O, leftMark == Board.Mark.O ? -1f : 1f, oPieceTexture, oStackTexture);
@@ -370,12 +386,12 @@ public class MatchScene extends BaseScene {
     }
 
     protected void leave() {
-        leaveTo(new OfflineMenuScene(context));
+        leaveTo(new OfflineMenuScene(context, returnToSelector));
     }
 
     // Take turns starting
     protected void playAgain() {
-        leaveTo(new MatchScene(context, firstTurn.opponent(), leftMark, ai, aiMark));
+        leaveTo(new MatchScene(context, firstTurn.opponent(), leftMark, ai, aiMark, returnToSelector));
     }
 
     protected void leaveTo(BaseScene scene) {

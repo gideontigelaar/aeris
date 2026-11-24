@@ -19,13 +19,23 @@ public class MainMenuScene extends MenuScene {
 
     private TextField nameField;
     private TextField serverField;
+    private final Runnable returnToSelector;
 
     public MainMenuScene(EngineContext context) {
-        this(context, "");
+        this(context, "", null);
+    }
+
+    public MainMenuScene(EngineContext context, Runnable returnToSelector) {
+        this(context, "", returnToSelector);
     }
 
     public MainMenuScene(EngineContext context, String status) {
+        this(context, status, null);
+    }
+
+    public MainMenuScene(EngineContext context, String status, Runnable returnToSelector) {
         super(context, status);
+        this.returnToSelector = returnToSelector;
     }
 
     @Override
@@ -36,8 +46,12 @@ public class MainMenuScene extends MenuScene {
         serverField.setColors(DIM_WHITE, HOVER_COLOR, HIGHLIGHT_COLOR);
 
         addButton("LOGIN ONLINE", this::openOnline);
-        addButton("PLAY OFFLINE", () -> open(new OfflineMenuScene(context)));
-        addSmallButton("QUIT GAME", context.window()::requestClose);
+        addButton("PLAY OFFLINE", () -> open(new OfflineMenuScene(context, returnToSelector)));
+        if (returnToSelector == null) {
+            addSmallButton("QUIT GAME", context.window()::requestClose);
+        } else {
+            addButton("BACK TO GAMES", returnToSelector);
+        }
     }
 
     private TextField createField(String text, String placeholder, int maxLength, IntPredicate allowedChars) {
@@ -66,7 +80,7 @@ public class MainMenuScene extends MenuScene {
             if (address == null) {
                 focus(serverField, "Enter a server address like " + Settings.DEFAULT_SERVER);
             } else {
-                open(new OnlineMenuScene(context, address));
+                open(new OnlineMenuScene(context, address, returnToSelector));
             }
         }
     }

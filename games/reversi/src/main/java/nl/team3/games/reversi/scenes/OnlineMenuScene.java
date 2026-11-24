@@ -14,6 +14,7 @@ import java.util.List;
 
 public class OnlineMenuScene extends MenuScene {
     private final ServerAddress address;
+    private final Runnable returnToSelector;
     private final List<Button> modeButtons = new ArrayList<>();
     private OnlineSession login;
 
@@ -22,18 +23,27 @@ public class OnlineMenuScene extends MenuScene {
     private Texture disconnectedTexture;
 
     public OnlineMenuScene(EngineContext context, ServerAddress address) {
-        this(context, address, "");
+        this(context, address, "", null);
+    }
+
+    public OnlineMenuScene(EngineContext context, ServerAddress address, Runnable returnToSelector) {
+        this(context, address, "", returnToSelector);
     }
 
     public OnlineMenuScene(EngineContext context, ServerAddress address, String status) {
+        this(context, address, status, null);
+    }
+
+    public OnlineMenuScene(EngineContext context, ServerAddress address, String status, Runnable returnToSelector) {
         super(context, status);
         this.address = address;
+        this.returnToSelector = returnToSelector;
     }
 
     @Override
     protected void initMenu(AssetManager assets) {
-        connectingTexture = assets.loadTexture("connectingStatus", "/games/reversi/textures/connectingStatus.png");
-        disconnectedTexture = assets.loadTexture("disconnectedStatus", "/games/reversi/textures/disconnectedStatus.png");
+        connectingTexture = assets.loadTexture("reversi.connectingStatus", "/games/reversi/textures/connectingStatus.png");
+        disconnectedTexture = assets.loadTexture("reversi.disconnectedStatus", "/games/reversi/textures/disconnectedStatus.png");
         statusDot = new Sprite(disconnectedTexture);
         statusDot.setScale(UI_SCALE);
 
@@ -59,7 +69,7 @@ public class OnlineMenuScene extends MenuScene {
         if (login == null) return;
 
         switch (login.updateLogin(dt)) {
-            case DONE -> open(new LobbyScene(context, login, false));
+            case DONE -> open(new LobbyScene(context, login, false, returnToSelector));
             case FAILED -> {
                 showStatus(login.getLoginError());
                 stopLogin();
@@ -75,7 +85,7 @@ public class OnlineMenuScene extends MenuScene {
             stopLogin();
             clearStatus();
         } else {
-            open(new MainMenuScene(context));
+            open(new MainMenuScene(context, returnToSelector));
         }
     }
 

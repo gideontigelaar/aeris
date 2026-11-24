@@ -110,15 +110,15 @@ public abstract class BaseScene implements Scene {
         spriteRenderer = assets.getSpriteRenderer();
         background = assets.getShared(BackgroundRenderer.class, BackgroundRenderer::new);
 
-        gameFont = assets.loadFont("gameFont", "/games/reversi/fonts/3x5-Microfont-Mono.ttf", 48f);
-        smallFont = assets.loadFont("smallFont", "/games/reversi/fonts/3x5-Microfont-Mono.ttf", 24f);
+        gameFont = assets.loadFont("reversi.gameFont", "/games/reversi/fonts/3x5-Microfont-Mono.ttf", 48f);
+        smallFont = assets.loadFont("reversi.smallFont", "/games/reversi/fonts/3x5-Microfont-Mono.ttf", 24f);
 
-        buttonTexture = assets.loadTexture("btnTexture", "/games/reversi/textures/button.png");
-        buttonPressedTexture = assets.loadTexture("btnPressedTexture", "/games/reversi/textures/buttonPressed.png");
-        logoTexture = assets.loadTexture("tripleTlogo", "/games/reversi/textures/tripleTlogo.png");
+        buttonTexture = assets.loadTexture("reversi.btnTexture", "/games/reversi/textures/button.png");
+        buttonPressedTexture = assets.loadTexture("reversi.btnPressedTexture", "/games/reversi/textures/buttonPressed.png");
+        logoTexture = assets.loadTexture("reversi.tripleTlogo", "/games/reversi/textures/tripleTlogo.png");
 
-        mousePointTexture = assets.loadTexture("mousePoint", "/games/reversi/textures/cursorPoint.png");
-        mouseGrabTexture = assets.loadTexture("mouseGrab", "/games/reversi/textures/cursorGrab.png");
+        mousePointTexture = assets.loadTexture("reversi.mousePoint", "/games/reversi/textures/cursorPoint.png");
+        mouseGrabTexture = assets.loadTexture("reversi.mouseGrab", "/games/reversi/textures/cursorGrab.png");
         context.window().setCursorVisible(false);
 
         mousePoint = new Sprite(mousePointTexture);

@@ -43,7 +43,7 @@ public abstract class MenuScene extends BaseScene {
     protected final void onInit(AssetManager assets) {
         playerName = Settings.getPlayerName();
         logo = createLogo();
-        profile = new Sprite(assets.loadTexture("anonUserProfile", "/games/reversi/textures/anonUserProfile.png"));
+        profile = new Sprite(assets.loadTexture("reversi.anonUserProfile", "/games/reversi/textures/anonUserProfile.png"));
         profile.setScale(UI_SCALE);
         initMenu(assets);
     }

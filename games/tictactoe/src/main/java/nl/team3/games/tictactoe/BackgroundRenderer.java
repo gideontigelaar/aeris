@@ -9,7 +9,7 @@ public class BackgroundRenderer {
     public static final int PALETTE_GREEN = 1;
     public static final int PALETTE_BLUE = 2;
 
-    private static final String SHADER_KEY = "background";
+    private static final String SHADER_KEY = "tictactoe.background";
     private static final String VERTEX_PATH = "/games/tictactoe/shaders/background.vert";
     private static final String FRAGMENT_PATH = "/games/tictactoe/shaders/background.frag";
 

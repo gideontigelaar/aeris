@@ -37,6 +37,7 @@ public class LobbyScene extends BaseScene {
 
     private final OnlineSession session;
     private final boolean searchOnStart;
+    private final Runnable returnToSelector;
 
     private Sprite statusDot;
     private Texture connectedTexture;
@@ -78,19 +79,24 @@ public class LobbyScene extends BaseScene {
     private float matchmakingY;
 
     public LobbyScene(EngineContext context, OnlineSession session, boolean searchOnStart) {
+        this(context, session, searchOnStart, null);
+    }
+
+    public LobbyScene(EngineContext context, OnlineSession session, boolean searchOnStart, Runnable returnToSelector) {
         super(context);
         this.session = session;
         this.searchOnStart = searchOnStart;
+        this.returnToSelector = returnToSelector;
     }
 
     @Override
     protected void onInit(AssetManager assets) {
-        connectedTexture = assets.loadTexture("connectedStatus", "/games/reversi/textures/connectedStatus.png");
-        connectingTexture = assets.loadTexture("connectingStatus", "/games/reversi/textures/connectingStatus.png");
-        disconnectedTexture = assets.loadTexture("disconnectedStatus", "/games/reversi/textures/disconnectedStatus.png");
+        connectedTexture = assets.loadTexture("reversi.connectedStatus", "/games/reversi/textures/connectedStatus.png");
+        connectingTexture = assets.loadTexture("reversi.connectingStatus", "/games/reversi/textures/connectingStatus.png");
+        disconnectedTexture = assets.loadTexture("reversi.disconnectedStatus", "/games/reversi/textures/disconnectedStatus.png");
         statusDot = new Sprite(connectedTexture);
         statusDot.setScale(UI_SCALE);
-        panel = new Sprite(assets.loadTexture("window", "/games/reversi/textures/window.png"));
+        panel = new Sprite(assets.loadTexture("reversi.window", "/games/reversi/textures/window.png"));
         pixel = new Sprite(assets.getTexture(AssetManager.WHITE_TEXTURE));
         pixel.setOrigin(0f, 0f);
 
@@ -132,7 +138,7 @@ public class LobbyScene extends BaseScene {
 
     private void leave() {
         session.disconnect();
-        transitionTo(new OnlineMenuScene(context, session.getAddress()));
+        transitionTo(new OnlineMenuScene(context, session.getAddress(), returnToSelector));
     }
 
     private void onRowClicked(int slot) {
@@ -174,7 +180,7 @@ public class LobbyScene extends BaseScene {
                 if (isLeaving()) return;
             }
             if (!session.isConnected()) {
-                transitionTo(new OnlineMenuScene(context, session.getAddress(), "Lost connection to the server!"));
+                transitionTo(new OnlineMenuScene(context, session.getAddress(), "Lost connection to the server!", returnToSelector));
                 return;
             }
 
@@ -209,7 +215,7 @@ public class LobbyScene extends BaseScene {
                 refreshTimer = REFRESH_TIME;
                 showNotice("Stopped searching for a match", WHITE);
             }
-            case FAILED -> transitionTo(new OnlineMenuScene(context, session.getAddress(), session.getLoginError()));
+            case FAILED -> transitionTo(new OnlineMenuScene(context, session.getAddress(), session.getLoginError(), returnToSelector));
             case PENDING -> { }
         }
     }
@@ -247,7 +253,7 @@ public class LobbyScene extends BaseScene {
             showNotice("Can't play " + match.get("GAMETYPE"), ERROR_COLOR);
             return;
         }
-        transitionTo(OnlineMatchScene.create(context, session, match));
+        transitionTo(OnlineMatchScene.create(context, session, match, returnToSelector));
     }
 
     private void stopSearching() {

@@ -19,6 +19,7 @@ public class OnlineMatchScene extends MatchScene {
     private static final float TURN_TIME_LIMIT = 10f;
 
     private final OnlineSession session;
+    private final Runnable returnToSelector;
     private final String opponentName;
     private final Board.Mark playerMark;
     private final boolean aiPlays;
@@ -32,19 +33,20 @@ public class OnlineMatchScene extends MatchScene {
     private String resultDetail;
 
     private OnlineMatchScene(EngineContext context, OnlineSession session,
-                             String opponent, Board.Mark playerMark, AIOpponent ai) {
-        super(context, Board.Mark.X, playerMark, ai, playerMark);
+                             String opponent, Board.Mark playerMark, AIOpponent ai, Runnable returnToSelector) {
+        super(context, Board.Mark.X, playerMark, ai, playerMark, returnToSelector);
         this.session = session;
+        this.returnToSelector = returnToSelector;
         this.opponentName = OnlineSession.displayName(opponent);
         this.playerMark = playerMark;
         this.aiPlays = ai != null;
     }
 
-    static OnlineMatchScene create(EngineContext context, OnlineSession session, ServerMessage match) {
+    static OnlineMatchScene create(EngineContext context, OnlineSession session, ServerMessage match, Runnable returnToSelector) {
         Board.Mark playerMark = session.isMe(match.get("PLAYERTOMOVE")) ? Board.Mark.X : Board.Mark.O;
         AIOpponent ai = session.getMode() == OnlineSession.Mode.AI_VS_AI
                 ? new AIOpponent(AIOpponent.Difficulty.UNBEATABLE) : null;
-        return new OnlineMatchScene(context, session, match.get("OPPONENT"), playerMark, ai);
+        return new OnlineMatchScene(context, session, match.get("OPPONENT"), playerMark, ai, returnToSelector);
     }
 
     @Override
@@ -85,7 +87,7 @@ public class OnlineMatchScene extends MatchScene {
 
     private void startNextMatch(ServerMessage match) {
         if (session.isOurGame(match)) {
-            leaveTo(create(context, session, match));
+            leaveTo(create(context, session, match, returnToSelector));
         } else {
             session.forfeit();
         }
@@ -250,11 +252,11 @@ public class OnlineMatchScene extends MatchScene {
             forfeitSent = true;
             return;
         }
-        leaveTo(new LobbyScene(context, session, false));
+        leaveTo(new LobbyScene(context, session, false, returnToSelector));
     }
 
     @Override
     protected void playAgain() {
-        leaveTo(new LobbyScene(context, session, true));
+        leaveTo(new LobbyScene(context, session, true, returnToSelector));
     }
 }
