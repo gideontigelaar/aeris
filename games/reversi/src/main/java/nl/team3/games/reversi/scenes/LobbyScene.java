@@ -31,8 +31,8 @@ public class LobbyScene extends BaseScene {
     private static final int MAX_ROWS = 6;
     private static final int NOTICE_LINES = 2;
     private static final NineSlice WINDOW_SLICE = new NineSlice(8, 2, 2, 2);
-    private static final Vector4f ACCEPT_HOVER_COLOR = new Vector4f(1f, 0.8f, 0f, 1f);
-    private static final Vector4f PRESSED_COLOR = new Vector4f(1f, 0.5f, 0f, 1f);
+    private static final Vector4f ACCEPT_HOVER_COLOR = new Vector4f(1f, 0.820f, 0f, 1f);
+    private static final Vector4f PRESSED_COLOR = new Vector4f(1f, 0.518f, 0.149f, 1f);
     private static final Vector4f SCROLL_COLOR = new Vector4f(0.408f, 0.682f, 0.831f, 1f);
 
     private final OnlineSession session;

@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MatchScene extends BaseScene {
     protected static final Vector4f WIN_COLOR = HIGHLIGHT_COLOR;
-    protected static final Vector4f LOSE_COLOR = new Vector4f(1f, 0.25f, 0.25f, 1f);
+    protected static final Vector4f LOSE_COLOR = new Vector4f(0.839f, 0.141f, 0.067f, 1f);
 
     private static final Vector4f X_COLOR = new Vector4f(1f, 0.149f, 0.455f, 1f);
     private static final Vector4f O_COLOR = new Vector4f(0.063f, 0.824f, 0.459f, 1f);
@@ -322,6 +322,10 @@ public class MatchScene extends BaseScene {
 
     private boolean showsPlayAgain() {
         return isMatchOver() && canPlayAgain();
+    }
+
+    private boolean isTurn(Board.Mark mark) {
+        return !isMatchOver() && !board.isGameOver() && board.getTurn() == mark;
     }
 
     protected String getStatus() {
@@ -753,7 +757,8 @@ public class MatchScene extends BaseScene {
         String name = getPlayerName(side.mark);
         if (name == null) return;
 
-        drawText(smallFont, fitText(smallFont, name, getNameSpace()), side.nameX, nameY, WHITE);
+        drawText(smallFont, fitText(smallFont, name, getNameSpace()), side.nameX, nameY,
+                isTurn(side.mark) ? HOVER_COLOR : WHITE);
     }
 
     private float getNameSpace() {

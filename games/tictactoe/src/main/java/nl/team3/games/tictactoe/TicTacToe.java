@@ -9,6 +9,8 @@ import org.joml.Vector4f;
 public final class TicTacToe {
     public static final String GAME_TYPE = "Tic-tac-toe";
 
+    private static final Vector4f MENU_BLUE = new Vector4f(0.137f, 0.286f, 0.459f, 1.0f);
+
     private TicTacToe() {
     }
 
@@ -17,7 +19,7 @@ public final class TicTacToe {
                 .windowSize(720, 720)
                 .minWindowSize(640, 640)
                 .minGuiSize(640, 640)
-                .clearColor(new Vector4f(0.62f, 0.62f, 0.62f, 1.0f))
+                .clearColor(MENU_BLUE)
                 .build();
 
         Engine.run(config, context -> {

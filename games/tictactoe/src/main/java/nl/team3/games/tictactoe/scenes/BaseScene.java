@@ -25,11 +25,11 @@ public abstract class BaseScene implements Scene {
     protected static final float BUTTON_WIDTH = 300f;
     protected static final float SMALL_BUTTON_WIDTH = 200f;
     protected static final float BUTTON_HEIGHT = 68f;
-    protected static final Vector4f WHITE = new Vector4f(1, 1, 1, 1);
-    protected static final Vector4f DIM_WHITE = new Vector4f(1, 1, 1, 0.7f);
-    protected static final Vector4f ERROR_COLOR = new Vector4f(1, 0, 0, 1);
-    protected static final Vector4f HIGHLIGHT_COLOR = new Vector4f(1, 1, 0, 1);
-    protected static final Vector4f HOVER_COLOR = new Vector4f(0.8f, 0.8f, 0, 1);
+    protected static final Vector4f WHITE = new Vector4f(0.980f, 0.992f, 1f, 1f);
+    protected static final Vector4f DIM_WHITE = new Vector4f(0.980f, 0.992f, 1f, 0.7f);
+    protected static final Vector4f ERROR_COLOR = new Vector4f(0.839f, 0.141f, 0.067f, 1f);
+    protected static final Vector4f HIGHLIGHT_COLOR = new Vector4f(1f, 0.820f, 0f, 1f);
+    protected static final Vector4f HOVER_COLOR = new Vector4f(1f, 0.820f, 0f, 1f);
     protected static final Vector4f DARK_TEXT_COLOR = new Vector4f(0f, 0.157f, 0.349f, 1f);
 
     private static final NineSlice BUTTON_SLICE = new NineSlice(5, 6, 5, 5);
