@@ -4,6 +4,7 @@ in vec2 vUV;
 out vec4 fragColor;
 
 uniform float iTime;
+uniform float iRippleTime;
 uniform vec2 iResolution;
 uniform int palette;
 uniform int previousPalette;
@@ -46,7 +47,7 @@ void main()
     vec2 discCenter = (group + 0.5) * cellSize * blockPx;
     float discDist = distance(discCenter, center);
 
-    float phase = (switching ? startTime : iTime) * rippleSpeed - discDist / (cellSize * blockPx) * ringGap;
+    float phase = iRippleTime * rippleSpeed - discDist / (cellSize * blockPx) * ringGap;
     float n = floor(phase);
     float f = fract(phase);
 
@@ -54,7 +55,7 @@ void main()
     float c = cos(flipT * PI);
 
     float switchT = floor(clamp((t - discDist / waveSpeed) / flipDuration, 0.0, 1.0) * 8.0) / 8.0;
-    float sx = max(abs(switching ? cos(switchT * PI) : c), 0.15);
+    float sx = max(abs(c * (switching ? cos(switchT * PI) : 1.0)), 0.15);
 
     bool lightSide = mod(n + (c < 0.0 ? 1.0 : 0.0) + group.x + group.y, 2.0) > 0.5;
 
