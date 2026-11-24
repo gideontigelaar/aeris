@@ -61,7 +61,7 @@ public class AIOpponent {
             return null;
         }
 
-        int me = board.getTurn() == Board.Mark.X ? 1 : -1;
+        int me = board.getTurn() == Board.Mark.BLACK ? 1 : -1;
         int[] cells = toArray(board.copyCells());
 
         List<Integer> legal = new ArrayList<>();
@@ -279,7 +279,7 @@ public class AIOpponent {
         for (int c = 0; c < SIZE; c++) {
             for (int r = 0; r < SIZE; r++) {
                 Board.Mark m = marks[c][r];
-                cells[c * SIZE + r] = m == null ? 0 : (m == Board.Mark.X ? 1 : -1);
+                cells[c * SIZE + r] = m == null ? 0 : (m == Board.Mark.BLACK ? 1 : -1);
             }
         }
         return cells;
