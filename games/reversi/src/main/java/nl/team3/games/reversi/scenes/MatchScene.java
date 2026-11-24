@@ -26,7 +26,9 @@ public class MatchScene extends BaseScene {
     protected static final Vector4f WIN_COLOR = HIGHLIGHT_COLOR;
     protected static final Vector4f LOSE_COLOR = new Vector4f(1f, 0.25f, 0.25f, 1f);
 
-    private static final float BOARD_SCALE = 3f;
+    private static final Vector4f SKY_COLOR = new Vector4f(0.408f, 0.682f, 0.831f, 1f);
+    private static final Vector4f BLUE_COLOR = new Vector4f(0.137f, 0.286f, 0.459f, 1f);
+    private static final float BOARD_SCALE = 4f;
     private static final float START_OFFSET_X = 2f * BOARD_SCALE;
     private static final float START_OFFSET_Y = 2f * BOARD_SCALE;
     private static final float STRIDE_X = 13f * BOARD_SCALE;
@@ -39,10 +41,7 @@ public class MatchScene extends BaseScene {
     private static final float PLAY_MOVE_TIME = 0.5f;
     private static final float PLAY_MOVE_ARC = 3f * BOARD_SCALE;
     private static final float GHOST_ALPHA = 0.4f;
-    private static final float SIDE_OFFSET_X = 240f;
-    private static final float TRAY_OUTER_SIZE = 20f * BOARD_SCALE;
-    private static final float TRAY_INNER_SIZE = 16f * BOARD_SCALE;
-    private static final float TRAY_RIM_OFFSET = BOARD_SCALE;
+    private static final float SIDE_BOARD_GAP = 72f;
     private static final float BOB_HEIGHT = BOARD_SCALE;
     private static final float BOB_TIME = 1.2f;
 
@@ -145,7 +144,11 @@ public class MatchScene extends BaseScene {
         }
 
         private float sideX() {
-            return Math.round(currentWidth / 2f) + direction * SIDE_OFFSET_X;
+            float halfBoard = boardTexture.getWidth() * BOARD_SCALE / 2f;
+            float centerX = Math.round(currentWidth / 2f);
+            float preferred = centerX + direction * (halfBoard + SIDE_BOARD_GAP);
+            float marginCenter = direction < 0 ? boardTopLeft.x / 2f : (boardTopLeft.x + halfBoard * 2f + currentWidth) / 2f;
+            return Math.round(direction < 0 ? Math.max(marginCenter, preferred) : Math.min(marginCenter, preferred));
         }
 
         private float sideY() {
@@ -156,28 +159,19 @@ public class MatchScene extends BaseScene {
             return Math.round(BOB_HEIGHT * (1f - (float) Math.cos(2 * Math.PI * bobTime / BOB_TIME)) / 2f);
         }
 
-        private void snapActiveToTray() {
+        private void snapActiveToRest() {
             active.setPosition(sideX(), sideY() - bobOffset());
         }
 
         private void layout() {
             if (active != null && !pickedUp && returnAnim == null) {
-                snapActiveToTray();
+                snapActiveToRest();
             }
         }
 
         private void setAlpha(float alpha) {
             this.alpha = alpha;
             if (active != null) active.setAlpha(alpha);
-        }
-
-        private void drawTray() {
-            float offset = getContentOffset();
-            float cx = sideX() + offset;
-            float cy = sideY();
-            drawTrayBox(cx, cy + TRAY_RIM_OFFSET, TRAY_OUTER_SIZE, SKY_COLOR, 0.45f * alpha);
-            drawTrayBox(cx, cy, TRAY_OUTER_SIZE, DARK_TEXT_COLOR, 0.85f * alpha);
-            drawTrayBox(cx, cy, TRAY_INNER_SIZE, BLUE_COLOR, 0.9f * alpha);
         }
 
         private void drawResting() {
@@ -465,7 +459,7 @@ public class MatchScene extends BaseScene {
             }
         } else {
             side.bobTime = isPlayable(side) ? side.bobTime + dt : settleBob(side.bobTime, dt);
-            side.snapActiveToTray();
+            side.snapActiveToRest();
         }
     }
 
@@ -647,22 +641,12 @@ public class MatchScene extends BaseScene {
         return false;
     }
 
-    private void drawTrayBox(float cx, float cy, float size, Vector4f color, float alpha) {
-        pixel.setOrigin(0.5f, 0.5f);
-        pixel.setPosition(Math.round(cx), Math.round(cy));
-        pixel.setScale(size, size);
-        pixel.setTint(color.x, color.y, color.z, alpha);
-        spriteRenderer.draw(pixel);
-    }
-
     @Override
     protected void onRender() {
         if (logoVisible) {
             spriteRenderer.draw(logo);
         }
         spriteRenderer.draw(boardSprite);
-        blackSide.drawTray();
-        whiteSide.drawTray();
         blackSide.drawResting();
         whiteSide.drawResting();
         for (int c = 0; c < Board.SIZE; c++) {
@@ -738,10 +722,6 @@ public class MatchScene extends BaseScene {
         String status = getStatus();
         Font statusFont = gameFont.getTextWidth(status) <= getMaxTextWidth() ? gameFont : smallFont;
         float y = statusY + (statusHeight - statusFont.getCapHeight()) / 2f;
-
-        float scoreY = statusY + statusFont.getCapHeight() * 2 + LINE_GAP;
-        drawCenteredText(smallFont, fitText(smallFont, getScoreText(), getMaxTextWidth()), scoreY, WHITE);
-
         drawCenteredText(statusFont, fitText(statusFont, status, getMaxTextWidth()), y, WHITE);
     }
 
@@ -806,9 +786,10 @@ public class MatchScene extends BaseScene {
             }
         }
 
+        float pieceHalfH = blackSide.pieceTexture.getHeight() * BOARD_SCALE / 2f;
         nameY = namesBelowBoard
                 ? boardBottom + UI_SPACING
-                : Math.round(currentHeight / 2f) + TRAY_OUTER_SIZE / 2f + UI_SPACING;
+                : Math.round(currentHeight / 2f) + pieceHalfH + UI_SPACING;
         countY = nameY + smallFont.getCapHeight() + LINE_GAP;
         float leftLimit = namesBelowBoard ? currentWidth / 2f : boardLeft;
         float rightLimit = namesBelowBoard ? currentWidth / 2f : boardRight;

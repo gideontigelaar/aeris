@@ -31,8 +31,6 @@ public abstract class BaseScene implements Scene {
     protected static final Vector4f HIGHLIGHT_COLOR = new Vector4f(1, 1, 0, 1);
     protected static final Vector4f HOVER_COLOR = new Vector4f(0.8f, 0.8f, 0, 1);
     protected static final Vector4f DARK_TEXT_COLOR = new Vector4f(0f, 0.157f, 0.349f, 1f);
-    protected static final Vector4f SKY_COLOR = new Vector4f(0.408f, 0.682f, 0.831f, 1f);
-    protected static final Vector4f BLUE_COLOR = new Vector4f(0.137f, 0.286f, 0.459f, 1f);
 
     private static final NineSlice BUTTON_SLICE = new NineSlice(5, 6, 5, 5);
     private static final int FONT_PIXEL_ROWS = 6;
