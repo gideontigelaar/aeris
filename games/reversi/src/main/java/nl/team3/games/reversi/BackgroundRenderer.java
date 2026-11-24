@@ -5,9 +5,9 @@ import nl.team3.engine.graphics.Mesh;
 import nl.team3.engine.graphics.ShaderProgram;
 
 public class BackgroundRenderer {
-    public static final int PALETTE_RED = 0;
-    public static final int PALETTE_GREEN = 1;
-    public static final int PALETTE_BLUE = 2;
+    public static final int PALETTE_BLACK = 0;
+    public static final int PALETTE_WHITE = 1;
+    public static final int PALETTE_MENU = 2;
 
     private static final String SHADER_KEY = "background";
     private static final String VERTEX_PATH = "/games/reversi/shaders/background.vert";
@@ -16,11 +16,9 @@ public class BackgroundRenderer {
     private final ShaderProgram shader;
     private final Mesh quad;
     private float time = 0f;
-    private int palette = PALETTE_BLUE;
-    private int previousPalette = PALETTE_BLUE;
+    private int palette = PALETTE_MENU;
+    private int previousPalette = PALETTE_MENU;
     private float startTime = 0f;
-    private float mouseX;
-    private float mouseY;
 
     public BackgroundRenderer(AssetManager assets) {
         this.shader = assets.loadShader(SHADER_KEY, VERTEX_PATH, FRAGMENT_PATH);
@@ -31,11 +29,12 @@ public class BackgroundRenderer {
         time += dt;
     }
 
-    public void setPalette(float x, float y, int num) {
+    public void setPalette(int num) {
+        if (num == palette) {
+            return;
+        }
         previousPalette = palette;
         palette = num;
-        mouseX = x;
-        mouseY = y;
         startTime = time;
     }
 
@@ -50,7 +49,6 @@ public class BackgroundRenderer {
         shader.setUniform1i("palette", palette);
         shader.setUniform1i("previousPalette", previousPalette);
         shader.setUniform1f("startTime", startTime);
-        shader.setUniform2f("mousePosition", mouseX, mouseY);
         quad.render();
     }
 }

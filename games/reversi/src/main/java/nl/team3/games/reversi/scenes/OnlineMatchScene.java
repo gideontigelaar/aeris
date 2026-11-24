@@ -145,12 +145,12 @@ public class OnlineMatchScene extends MatchScene {
             winner = playerMark.opponent();
         }
         result = won ? "YOU WIN!" : lost ? "YOU LOSE!" : "DRAW!";
-        resultDetail = resultDetail(message.get("COMMENT"), won, lost);
+        resultDetail = resultDetail(message.get("COMMENT"), won);
         btnAction.setText("LEAVE GAME");
         finishMatch();
     }
 
-    private String resultDetail(String comment, boolean won, boolean lost) {
+    private String resultDetail(String comment, boolean won) {
         String reason = comment.toLowerCase(Locale.ROOT);
         if (reason.startsWith(FORFEITED)) {
             return won ? opponentName + " FORFEITED" : "YOU FORFEITED";
@@ -167,10 +167,7 @@ public class OnlineMatchScene extends MatchScene {
         if (!comment.isBlank()) {
             return comment.toUpperCase(Locale.ROOT);
         }
-        if (won || lost) {
-            return won ? "THREE IN A ROW!" : opponentName + " GOT THREE IN A ROW";
-        }
-        return "NO MOVES LEFT";
+        return getScoreText();
     }
 
     private Board.Mark getWinner() {
@@ -205,13 +202,7 @@ public class OnlineMatchScene extends MatchScene {
 
     @Override
     protected String getResultDetail() {
-        if (resultDetail != null) {
-            return resultDetail;
-        }
-        if (getWinner() == null) {
-            return "NO MOVES LEFT";
-        }
-        return getWinner() == playerMark ? "THREE IN A ROW!" : opponentName + " GOT THREE IN A ROW";
+        return resultDetail != null ? resultDetail : super.getResultDetail();
     }
 
     @Override
@@ -240,7 +231,7 @@ public class OnlineMatchScene extends MatchScene {
         if (!matchEnded) {
             return super.getPalette();
         }
-        return winner == null ? BackgroundRenderer.PALETTE_BLUE : paletteOf(winner);
+        return winner == null ? BackgroundRenderer.PALETTE_MENU : paletteOf(winner);
     }
 
     @Override
