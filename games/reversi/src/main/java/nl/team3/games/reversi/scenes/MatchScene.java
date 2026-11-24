@@ -26,8 +26,6 @@ public class MatchScene extends BaseScene {
     protected static final Vector4f WIN_COLOR = HIGHLIGHT_COLOR;
     protected static final Vector4f LOSE_COLOR = new Vector4f(1f, 0.25f, 0.25f, 1f);
 
-    private static final Vector4f X_COLOR = new Vector4f(1f, 0.149f, 0.455f, 1f);
-    private static final Vector4f O_COLOR = new Vector4f(0.063f, 0.824f, 0.459f, 1f);
     private static final float BOARD_SCALE = 3f;
     private static final float START_OFFSET_X = 2f * BOARD_SCALE;
     private static final float START_OFFSET_Y = 2f * BOARD_SCALE;
@@ -49,11 +47,6 @@ public class MatchScene extends BaseScene {
     private static final float BOB_HEIGHT = BOARD_SCALE;
     private static final float BOB_TIME = 1.2f;
 
-    private static final float WIN_DELAY = 0.4f;
-    private static final float WIN_HOP_TIME = 0.4f;
-    private static final float WIN_HOP_GAP = 0.15f;
-    private static final float WIN_REPEAT_TIME = 1.6f;
-    private static final float WIN_HOP_HEIGHT = 3f * BOARD_SCALE;
     private static final float FADE_ALPHA = 0.35f;
     private static final float FADE_TIME = 0.4f;
     private static final float AI_MOVE_DELAY = 0.5f;
@@ -79,16 +72,13 @@ public class MatchScene extends BaseScene {
     private boolean logoVisible;
     private Sprite ghost;
     private Sprite pixel;
-    private String ScoreLine;
-    private PieceSide xSide;
-    private PieceSide oSide;
+    private PieceSide blackSide;
+    private PieceSide whiteSide;
     private final Sprite[][] boardPieces = new Sprite[Board.SIZE][Board.SIZE];
     private final List<PieceMove> settling = new ArrayList<>();
     private int pressedCell = -1;
     private int ghostCell = -1;
 
-    private int[][] winningLine;
-    private float winTime;
     private Animation fadeAnim;
     private Animation resultAnim;
     private final List<Confetti> confetti = new ArrayList<>();
@@ -262,7 +252,7 @@ public class MatchScene extends BaseScene {
                 Board.Mark.X, null, null);
     }
 
-    // Against the computer, which plays O on the right
+    // Against the computer, which plays white on the right
     public MatchScene(EngineContext context, AIOpponent ai) {
         this(context, Board.Mark.X, Board.Mark.X, ai, Board.Mark.O);
     }
@@ -279,26 +269,23 @@ public class MatchScene extends BaseScene {
 
     @Override
     protected void onInit(AssetManager assets) {
-        ScoreLine = "no score yet lol";
         boardTexture = assets.loadTexture("board", "/games/reversi/textures/board.png");
         boardSprite = new Sprite(boardTexture);
         boardSprite.setScale(BOARD_SCALE);
         logo = createLogo();
         pixel = new Sprite(assets.getTexture(AssetManager.WHITE_TEXTURE));
 
-        Texture xPieceTexture = assets.loadTexture("xPiece", "/games/reversi/textures/x.png");
-        Texture xStackTexture = assets.loadTexture("xStack", "/games/reversi/textures/xStack.png");
-        Texture oPieceTexture = assets.loadTexture("oPiece", "/games/reversi/textures/o.png");
-        Texture oStackTexture = assets.loadTexture("oStack", "/games/reversi/textures/oStack.png");
+        Texture blackPieceTexture = assets.loadTexture("xPiece", "/games/reversi/textures/x.png");
+        Texture blackStackTexture = assets.loadTexture("xStack", "/games/reversi/textures/xStack.png");
+        Texture whitePieceTexture = assets.loadTexture("oPiece", "/games/reversi/textures/o.png");
+        Texture whiteStackTexture = assets.loadTexture("oStack", "/games/reversi/textures/oStack.png");
 
-        xSide = new PieceSide(Board.Mark.X, leftMark == Board.Mark.X ? -1f : 1f, xPieceTexture, xStackTexture);
-        oSide = new PieceSide(Board.Mark.O, leftMark == Board.Mark.O ? -1f : 1f, oPieceTexture, oStackTexture);
+        blackSide = new PieceSide(Board.Mark.X, leftMark == Board.Mark.X ? -1f : 1f, blackPieceTexture, blackStackTexture);
+        whiteSide = new PieceSide(Board.Mark.O, leftMark == Board.Mark.O ? -1f : 1f, whitePieceTexture, whiteStackTexture);
 
-        ghost = new Sprite(xPieceTexture);
+        ghost = new Sprite(blackPieceTexture);
         ghost.setScale(BOARD_SCALE);
         ghost.setAlpha(GHOST_ALPHA);
-
-
 
         btnAction = createButton("LEAVE GAME", BUTTON_WIDTH, this::leave);
         btnPlayAgain = createButton("PLAY AGAIN", BUTTON_WIDTH, this::playAgain);
@@ -339,9 +326,17 @@ public class MatchScene extends BaseScene {
         return isMatchOver() && canPlayAgain();
     }
 
+    private static String markName(Board.Mark mark) {
+        return mark == Board.Mark.X ? "BLACK" : "WHITE";
+    }
+
+    protected String getScoreText() {
+        return "BLACK: " + board.getXscore() + " | WHITE: " + board.getOscore();
+    }
+
     protected String getStatus() {
         if (ai == null) {
-            return board.getTurn() + "'S TURN";
+            return markName(board.getTurn()) + "'S TURN";
         }
         return board.getTurn() == aiMark ? "AI'S TURN" : "YOUR TURN";
     }
@@ -352,19 +347,13 @@ public class MatchScene extends BaseScene {
             return "DRAW!";
         }
         if (ai == null) {
-            return winner + " WINS!";
+            return markName(winner) + " WINS!";
         }
         return winner == aiMark ? "YOU LOSE!" : "YOU WIN!";
     }
 
     protected String getResultDetail() {
-        if (board.getWinner() == null) {
-            return "NO MOVES LEFT";
-        }
-        if (ai == null || board.getWinner() != aiMark) {
-            return "THREE IN A ROW!";
-        }
-        return "THE AI GOT THREE IN A ROW";
+        return getScoreText();
     }
 
     protected Vector4f getResultColor() {
@@ -399,11 +388,15 @@ public class MatchScene extends BaseScene {
 
     @Override
     protected int getPalette() {
-        return board.isDraw() ? BackgroundRenderer.PALETTE_BLUE : paletteOf(board.getTurn());
+        if (!board.isGameOver()) {
+            return paletteOf(board.getTurn());
+        }
+        Board.Mark winner = board.getWinner();
+        return winner == null ? BackgroundRenderer.PALETTE_MENU : paletteOf(winner);
     }
 
     protected static int paletteOf(Board.Mark mark) {
-        return mark == Board.Mark.X ? BackgroundRenderer.PALETTE_RED : BackgroundRenderer.PALETTE_GREEN;
+        return mark == Board.Mark.X ? BackgroundRenderer.PALETTE_BLACK : BackgroundRenderer.PALETTE_WHITE;
     }
 
     private Vector2f getGridCenter(int col, int row) {
@@ -414,7 +407,7 @@ public class MatchScene extends BaseScene {
     }
 
     private PieceSide sideOf(Board.Mark mark) {
-        return mark == Board.Mark.X ? xSide : oSide;
+        return mark == Board.Mark.X ? blackSide : whiteSide;
     }
 
     @Override
@@ -427,8 +420,8 @@ public class MatchScene extends BaseScene {
         }
 
         updateAI(dt);
-        updateSide(xSide, oSide, dt);
-        updateSide(oSide, xSide, dt);
+        updateSide(blackSide, whiteSide, dt);
+        updateSide(whiteSide, blackSide, dt);
         updateTap();
         updateSettling(dt);
         updateGameOver(dt);
@@ -583,21 +576,18 @@ public class MatchScene extends BaseScene {
         if (board.isGameOver()) {
             finishMatch();
         } else {
-            PieceSide next = sideOf(board.getTurn());
-            updatePalette(next.stackX(), next.levelY(next.stack.size()));
+            updatePalette();
         }
-
     }
 
     protected void finishMatch() {
         if (fadeAnim == null) {
-            //winningLine = board.getWinningLine();
             fadeAnim = new Animation(1f, FADE_ALPHA, EasingType.EXPONENTIAL_OUT, FADE_TIME);
             fadeAnim.startAnimation();
             resultAnim = new Animation(0f, 1f, EasingType.BACK_OUT, RESULT_DROP_TIME);
         }
         layoutButtons();
-        updatePalette(boardSprite.getPosition().x, boardSprite.getPosition().y);
+        updatePalette();
     }
 
     private void updateSettling(float dt) {
@@ -621,33 +611,8 @@ public class MatchScene extends BaseScene {
         resultAnim.update(dt);
         fadeAnim.update(dt);
         float alpha = fadeAnim.getValue();
-        xSide.setAlpha(alpha);
-        oSide.setAlpha(alpha);
-        if (winningLine == null) return;
-
-        for (int c = 0; c < Board.SIZE; c++) {
-            for (int r = 0; r < Board.SIZE; r++) {
-                if (boardPieces[c][r] != null && !isWinningCell(c, r)) boardPieces[c][r].setAlpha(alpha);
-            }
-        }
-
-        winTime += dt;
-        if (winTime < WIN_DELAY) return;
-
-        for (int i = 0; i < winningLine.length; i++) {
-            float t = (winTime - WIN_DELAY - i * WIN_HOP_GAP) % WIN_REPEAT_TIME;
-            float hop = t > 0f && t < WIN_HOP_TIME ? (float) Math.sin(Math.PI * t / WIN_HOP_TIME) : 0f;
-            int[] cell = winningLine[i];
-            Vector2f center = getGridCenter(cell[0], cell[1]);
-            boardPieces[cell[0]][cell[1]].setPosition(center.x, Math.round(center.y - hop * WIN_HOP_HEIGHT));
-        }
-    }
-
-    private boolean isWinningCell(int col, int row) {
-        for (int[] cell : winningLine) {
-            if (cell[0] == col && cell[1] == row) return true;
-        }
-        return false;
+        blackSide.setAlpha(alpha);
+        whiteSide.setAlpha(alpha);
     }
 
     private void spawnConfetti() {
@@ -663,8 +628,8 @@ public class MatchScene extends BaseScene {
             Vector4f color = switch (i % 4) {
                 case 0 -> main;
                 case 1 -> WHITE;
-                case 2 -> X_COLOR;
-                default -> O_COLOR;
+                case 2 -> SKY_COLOR;
+                default -> BLUE_COLOR;
             };
             piece.color.set(color);
             piece.flipTime = random.nextFloat(0.08f, 0.2f);
@@ -699,8 +664,8 @@ public class MatchScene extends BaseScene {
             spriteRenderer.draw(logo);
         }
         spriteRenderer.draw(boardSprite);
-        xSide.drawResting();
-        oSide.drawResting();
+        blackSide.drawResting();
+        whiteSide.drawResting();
         for (int c = 0; c < Board.SIZE; c++) {
             for (int r = 0; r < Board.SIZE; r++) {
                 Sprite piece = boardPieces[c][r];
@@ -711,8 +676,8 @@ public class MatchScene extends BaseScene {
         renderConfetti();
 
         renderStatus();
-        drawPlayerName(xSide);
-        drawPlayerName(oSide);
+        drawPlayerName(blackSide);
+        drawPlayerName(whiteSide);
 
         btnAction.render(spriteRenderer, textRenderer);
         if (showsPlayAgain()) {
@@ -722,8 +687,8 @@ public class MatchScene extends BaseScene {
         for (PieceMove move : settling) {
             spriteRenderer.draw(move.piece);
         }
-        xSide.drawMoving();
-        oSide.drawMoving();
+        blackSide.drawMoving();
+        whiteSide.drawMoving();
     }
 
     private void renderGhost() {
@@ -757,10 +722,7 @@ public class MatchScene extends BaseScene {
                 }
             }
         }
-        ScoreLine = "X: " + board.getXscore() + " | O: " + board.getOscore();
     }
-
-
 
     private void renderStatus() {
         if (fadeAnim != null) {
@@ -768,7 +730,6 @@ public class MatchScene extends BaseScene {
 
             float drop = Math.round((1f - resultAnim.getValue()) * RESULT_DROP);
             drawCenteredText(gameFont, fitText(gameFont, getResultTitle(), getMaxTextWidth()), statusY - drop, getResultColor());
-
 
             String detail = fitText(smallFont, getResultDetail(), getMaxTextWidth());
             drawCenteredText(smallFont, detail, statusY + gameFont.getCapHeight() + LINE_GAP - drop, WHITE);
@@ -780,7 +741,7 @@ public class MatchScene extends BaseScene {
         float y = statusY + (statusHeight - statusFont.getCapHeight()) / 2f;
 
         float scoreY = statusY + statusFont.getCapHeight() * 2 + LINE_GAP;
-        drawCenteredText(smallFont, fitText(smallFont, ScoreLine, getMaxTextWidth()), scoreY, WHITE);
+        drawCenteredText(smallFont, fitText(smallFont, getScoreText(), getMaxTextWidth()), scoreY, WHITE);
 
         drawCenteredText(statusFont, fitText(statusFont, status, getMaxTextWidth()), y, WHITE);
     }
@@ -790,7 +751,6 @@ public class MatchScene extends BaseScene {
         if (name == null) return;
 
         drawText(smallFont, fitText(smallFont, name, getNameSpace()), side.nameX, nameY, WHITE);
-
     }
 
     private float getNameSpace() {
@@ -824,10 +784,10 @@ public class MatchScene extends BaseScene {
             }
         }
 
-        xSide.returnAnim = null;
-        oSide.returnAnim = null;
-        xSide.layout();
-        oSide.layout();
+        blackSide.returnAnim = null;
+        whiteSide.returnAnim = null;
+        blackSide.layout();
+        whiteSide.layout();
 
         layoutNames();
         layoutButtons();
@@ -838,7 +798,7 @@ public class MatchScene extends BaseScene {
         float boardRight = boardLeft + boardTexture.getWidth() * BOARD_SCALE;
         float boardBottom = boardTopLeft.y + boardTexture.getHeight() * BOARD_SCALE;
         namesBelowBoard = false;
-        for (PieceSide side : List.of(xSide, oSide)) {
+        for (PieceSide side : List.of(blackSide, whiteSide)) {
             String name = getPlayerName(side.mark);
             if (name != null && smallFont.getTextWidth(name) > boardLeft - 2 * UI_SPACING) {
                 namesBelowBoard = true;
@@ -851,7 +811,7 @@ public class MatchScene extends BaseScene {
         float leftLimit = namesBelowBoard ? currentWidth / 2f : boardLeft;
         float rightLimit = namesBelowBoard ? currentWidth / 2f : boardRight;
 
-        for (PieceSide side : List.of(xSide, oSide)) {
+        for (PieceSide side : List.of(blackSide, whiteSide)) {
             String name = getPlayerName(side.mark);
             float width = name == null ? 0f : smallFont.getTextWidth(fitText(smallFont, name, getNameSpace()));
             float min = side.direction < 0 ? UI_SPACING : rightLimit + UI_SPACING / 2f;
@@ -865,8 +825,8 @@ public class MatchScene extends BaseScene {
         List<Sprite> sprites = new ArrayList<>();
         sprites.add(boardSprite);
         if (logoVisible) sprites.add(logo);
-        xSide.collectSprites(sprites);
-        oSide.collectSprites(sprites);
+        blackSide.collectSprites(sprites);
+        whiteSide.collectSprites(sprites);
         for (int c = 0; c < Board.SIZE; c++) {
             for (int r = 0; r < Board.SIZE; r++) {
                 if (boardPieces[c][r] != null) sprites.add(boardPieces[c][r]);
