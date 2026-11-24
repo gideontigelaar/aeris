@@ -117,7 +117,7 @@ public abstract class BaseScene implements Scene {
 
         buttonTexture = assets.loadTexture("btnTexture", "/games/reversi/textures/button.png");
         buttonPressedTexture = assets.loadTexture("btnPressedTexture", "/games/reversi/textures/buttonPressed.png");
-        logoTexture = assets.loadTexture("tripleTlogo", "/games/reversi/textures/tripleTlogo.png");
+        logoTexture = assets.loadTexture("reversiLogo", "/games/reversi/textures/reversiLogo.png");
 
         mousePointTexture = assets.loadTexture("mousePoint", "/games/reversi/textures/cursorPoint.png");
         mouseGrabTexture = assets.loadTexture("mouseGrab", "/games/reversi/textures/cursorGrab.png");

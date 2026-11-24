@@ -33,7 +33,7 @@ public class OnlineMatchScene extends MatchScene {
 
     private OnlineMatchScene(EngineContext context, OnlineSession session,
                              String opponent, Board.Mark playerMark, AIOpponent ai) {
-        super(context, Board.Mark.X, playerMark, ai, playerMark);
+        super(context, Board.Mark.BLACK, playerMark, ai, playerMark);
         this.session = session;
         this.opponentName = OnlineSession.displayName(opponent);
         this.playerMark = playerMark;
@@ -41,7 +41,7 @@ public class OnlineMatchScene extends MatchScene {
     }
 
     static OnlineMatchScene create(EngineContext context, OnlineSession session, ServerMessage match) {
-        Board.Mark playerMark = session.isMe(match.get("PLAYERTOMOVE")) ? Board.Mark.X : Board.Mark.O;
+        Board.Mark playerMark = session.isMe(match.get("PLAYERTOMOVE")) ? Board.Mark.BLACK : Board.Mark.WHITE;
         AIOpponent ai = session.getMode() == OnlineSession.Mode.AI_VS_AI
                 ? new AIOpponent(AIOpponent.Difficulty.UNBEATABLE) : null;
         return new OnlineMatchScene(context, session, match.get("OPPONENT"), playerMark, ai);
