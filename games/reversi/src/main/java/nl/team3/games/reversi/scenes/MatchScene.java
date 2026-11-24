@@ -41,7 +41,7 @@ public class MatchScene extends BaseScene {
     private static final float MOVE_TIME = 0.3f;
     private static final float PLAY_MOVE_TIME = 0.5f;
     private static final float PLAY_MOVE_ARC = 3f * BOARD_SCALE;
-    private static final float GHOST_ALPHA = 0.4f;
+    private static final float GHOST_ALPHA = 0.35f;
     private static final float SIDE_BOARD_GAP = 72f;
     private static final float BOB_HEIGHT = BOARD_SCALE;
     private static final float BOB_TIME = 1.2f;
@@ -262,6 +262,7 @@ public class MatchScene extends BaseScene {
         whiteSide = new PieceSide(Board.Mark.WHITE, leftMark == Board.Mark.WHITE ? -1f : 1f, whitePieceTexture);
 
         ghost = new Sprite(blackPieceTexture);
+        ghost.setOrigin(0.5f, 0.5f);
         ghost.setScale(BOARD_SCALE);
         ghost.setAlpha(GHOST_ALPHA);
 
@@ -701,12 +702,34 @@ public class MatchScene extends BaseScene {
     }
 
     private void renderGhost() {
-        if (ghostCell < 0) return;
+        Board.Mark turn = board.getTurn();
+        if (turn == null || isMatchOver() || board.isGameOver() || !canMove(turn) || !isHuman(turn)) {
+            return;
+        }
 
-        PieceSide side = sideOf(board.getTurn());
+        PieceSide side = sideOf(turn);
+        if (side.active == null) {
+            return;
+        }
+
+        System.out.println("renderGhost running for turn=" + turn);
+
         ghost.setTexture(side.pieceTexture);
-        ghost.setPosition(getGridCenter(ghostCell % Board.SIZE, ghostCell / Board.SIZE));
-        spriteRenderer.draw(ghost);
+        ghost.setOrigin(0.5f, 0.5f);
+        ghost.setScale(BOARD_SCALE);
+        ghost.setTint(1f, 1f, 1f, 1f);
+        ghost.setAlpha(GHOST_ALPHA);
+
+        for (int c = 0; c < Board.SIZE; c++) {
+            for (int r = 0; r < Board.SIZE; r++) {
+                if (board.canPlace(c, r)) {
+                    ghost.setPosition(getGridCenter(c, r));
+                    spriteRenderer.draw(ghost);
+                }
+            }
+        }
+
+        ghost.setAlpha(1f);
     }
 
     private void renderConfetti() {
@@ -861,10 +884,12 @@ public class MatchScene extends BaseScene {
         float centerX = Math.round(currentWidth / 2f);
 
         if (showsPlayAgain()) {
-            btnPlayAgain.setPosition(centerX - UI_SPACING / 2f - BUTTON_WIDTH, y);
-            btnAction.setPosition(centerX + UI_SPACING / 2f, y);
+            float gap = UI_SPACING;
+            float totalWidth = BUTTON_WIDTH * 2f + gap;
+            btnPlayAgain.setPosition(Math.round(centerX - totalWidth / 2f), y);
+            btnAction.setPosition(Math.round(centerX - totalWidth / 2f + BUTTON_WIDTH + gap), y);
         } else {
-            btnAction.setPosition(centerX - BUTTON_WIDTH / 2f, y);
+            btnAction.setPosition(Math.round(centerX - BUTTON_WIDTH / 2f), y);
         }
     }
 }

@@ -336,7 +336,7 @@ public abstract class BaseScene implements Scene {
 
         introBuilt = true;
         for (Slide slide : intros) {
-            slide.anim.update(introTime);   // keeps progress if the window is resized mid-intro
+            slide.anim.update(introTime);
         }
         applyIntro();
     }
