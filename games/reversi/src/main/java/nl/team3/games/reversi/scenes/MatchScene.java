@@ -24,7 +24,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class MatchScene extends BaseScene {
     protected static final Vector4f WIN_COLOR = HIGHLIGHT_COLOR;
-    protected static final Vector4f LOSE_COLOR = new Vector4f(1f, 0.25f, 0.25f, 1f);
+    protected static final Vector4f LOSE_COLOR = new Vector4f(0.839f, 0.141f, 0.067f, 1f);
 
     private static final Vector4f SKY_COLOR = new Vector4f(0.408f, 0.682f, 0.831f, 1f);
     private static final Vector4f BLUE_COLOR = new Vector4f(0.137f, 0.286f, 0.459f, 1f);
@@ -36,6 +36,7 @@ public class MatchScene extends BaseScene {
     private static final float CELL_HALF_W = 6f * BOARD_SCALE;
     private static final float CELL_HALF_H = 6.5f * BOARD_SCALE;
 
+    private static final float HOLDER_SIZE = 18f * BOARD_SCALE;
     private static final float GRAB_SCALE = BOARD_SCALE + 1f;
     private static final float MOVE_TIME = 0.3f;
     private static final float PLAY_MOVE_TIME = 0.5f;
@@ -301,6 +302,10 @@ public class MatchScene extends BaseScene {
 
     private boolean showsPlayAgain() {
         return isMatchOver() && canPlayAgain();
+    }
+
+    private boolean isTurn(Board.Mark mark) {
+        return !isMatchOver() && !board.isGameOver() && board.getTurn() == mark;
     }
 
     private static String markName(Board.Mark mark) {
@@ -647,6 +652,8 @@ public class MatchScene extends BaseScene {
             spriteRenderer.draw(logo);
         }
         spriteRenderer.draw(boardSprite);
+        drawPieceHolder(blackSide);
+        drawPieceHolder(whiteSide);
         blackSide.drawResting();
         whiteSide.drawResting();
         for (int c = 0; c < Board.SIZE; c++) {
@@ -672,6 +679,25 @@ public class MatchScene extends BaseScene {
         }
         blackSide.drawMoving();
         whiteSide.drawMoving();
+    }
+
+    private void drawPieceHolder(PieceSide side) {
+        float x = side.sideX() + getContentOffset();
+        float y = side.sideY();
+        drawHolderRect(x, y, HOLDER_SIZE, DARK_TEXT_COLOR, side.alpha);
+        drawHolderRect(x, y, HOLDER_SIZE - 2f * BOARD_SCALE, WHITE, side.alpha);
+        drawHolderRect(x, y, HOLDER_SIZE - 4f * BOARD_SCALE, SKY_COLOR, side.alpha);
+        drawHolderRect(x, y, HOLDER_SIZE - 6f * BOARD_SCALE, BLUE_COLOR, side.alpha);
+        pixel.setAlpha(1f);
+    }
+
+    private void drawHolderRect(float x, float y, float size, Vector4f color, float alpha) {
+        pixel.setOrigin(0.5f, 0.5f);
+        pixel.setPosition(x, y);
+        pixel.setScale(size, size);
+        pixel.setTint(color.x, color.y, color.z, 1f);
+        pixel.setAlpha(alpha);
+        spriteRenderer.draw(pixel);
     }
 
     private void renderGhost() {
@@ -728,7 +754,8 @@ public class MatchScene extends BaseScene {
     private void drawSideInfo(PieceSide side) {
         String name = getPlayerName(side.mark);
         if (name != null) {
-            drawText(smallFont, fitText(smallFont, name, getNameSpace()), side.nameX, nameY, WHITE);
+            drawText(smallFont, fitText(smallFont, name, getNameSpace()), side.nameX, nameY,
+                    isTurn(side.mark) ? HOVER_COLOR : WHITE);
         }
         String count = String.valueOf(getScore(side.mark));
         drawText(smallFont, count, side.countX, countY, DIM_WHITE);
@@ -786,7 +813,7 @@ public class MatchScene extends BaseScene {
             }
         }
 
-        float pieceHalfH = blackSide.pieceTexture.getHeight() * BOARD_SCALE / 2f;
+        float pieceHalfH = Math.max(HOLDER_SIZE / 2f, blackSide.pieceTexture.getHeight() * BOARD_SCALE / 2f);
         nameY = namesBelowBoard
                 ? boardBottom + UI_SPACING
                 : Math.round(currentHeight / 2f) + pieceHalfH + UI_SPACING;
