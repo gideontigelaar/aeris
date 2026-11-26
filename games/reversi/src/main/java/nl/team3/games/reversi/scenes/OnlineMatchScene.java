@@ -119,6 +119,7 @@ public class OnlineMatchScene extends MatchScene {
         session.move(row * Board.SIZE + col);
     }
 
+    // MatchScene.renderGhost() calls canMove(turn) so ghost tiles only appear when it's your active turn
     @Override
     protected boolean canMove(Board.Mark mark) {
         return mark == playerMark && yourTurn;
